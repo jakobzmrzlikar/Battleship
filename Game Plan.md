@@ -1,8 +1,8 @@
 #Ideas:
 
 
--Program makes a n x n table
+*Program makes a n x n table
 
--It randomly locates your and your opponent's ships.
+*It randomly locates your and your opponent's ships.
 
--The AI contains an advanced guessing algorithm.
+*The AI contains an advanced guessing algorithm.
