@@ -1,7 +1,7 @@
 #Ideas:
 
 
-* Program makes a n x n table
+* Program makes a n x n table.
 
 * It randomly locates your and your opponent's ships.
 
