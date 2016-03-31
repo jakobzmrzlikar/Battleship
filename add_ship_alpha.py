@@ -28,11 +28,14 @@ def make_board(a):
 
 def add_ship(n, board):
 
+	rows = size[0]
+	columns = size[1]
+
 	dic = {
-	"0": [0, -1],
-	"1": [0, 1],
-	"2": [-1, 0],
-	"3": [1, 0]
+	0: [0, -1],
+	1: [0, 1],
+	2: [-1, 0],
+	3: [1, 0]
 	}
 
 	space = 0
@@ -50,38 +53,40 @@ def add_ship(n, board):
 					for j in range(n - 1 - space):
 						if board[ship_row - j * dic[ship_direction][0]][ship_col - j * dic[ship_direction][1]] == "X":
 							break
+
 					for k in range(n):
-						board[ship_row + (space - k) * dic[ship_direction][0]]
+						board[ship_row + (space - k) * dic[ship_direction][0]] \
 						[ship_col + (space - k) * dic[ship_direction][1]] = "S"
 
-						board[ship_row + (space - k) * dic[ship_direction][0] + dic[ship_direction][1]]
+						board[ship_row + (space - k) * dic[ship_direction][0] + dic[ship_direction][1]] \
 						[ship_col + (space - k) * dic[ship_direction][1] + dic[ship_direction][0]] = "X"
 
-						board[ship_row + (space - k) * dic[ship_direction][0] - dic[ship_direction][1]]
+						board[ship_row + (space - k) * dic[ship_direction][0] - dic[ship_direction][1]] \
 						[ship_col + (space - k) * dic[ship_direction][1] - dic[ship_direction][0]] = "X"
 
-					board[ship_row + (space + 1) * dic[ship_direction][0]]
+					board[ship_row + (space + 1) * dic[ship_direction][0]] \
 					[ship_col + (space + 1) * dic[ship_direction][1]] = "X"
 
-					board[ship_row + (space - n) * dic[ship_direction][0]]
+					board[ship_row + (space - n) * dic[ship_direction][0]] \
 					[ship_col + (space - n) * dic[ship_direction][1]] = "X"
 
 					exit = True
 					break
+					
 			for k in range(n):
-				board[ship_row - k * dic[ship_direction][0]]
+				board[ship_row - k * dic[ship_direction][0]] \
 				[ship_col - k * dic[ship_direction][1]] = "S"
 
-				board[ship_row - k * dic[ship_direction][0] + dic[ship_direction][1]]
+				board[ship_row - k * dic[ship_direction][0] + dic[ship_direction][1]] \
 				[ship_col - k * dic[ship_direction][1] + dic[ship_direction][0]] = "X"
 
-				board[ship_row - k * dic[ship_direction][0] - dic[ship_direction][1]]
+				board[ship_row - k * dic[ship_direction][0] - dic[ship_direction][1]] \
 				[ship_col - k * dic[ship_direction][1] - dic[ship_direction][0]] = "X"
 
-			board[ship_row + dic[ship_direction][0]]
+			board[ship_row + dic[ship_direction][0]] \
 			[ship_col + dic[ship_direction][1]] = "X"
 
-			board[ship_row - n * dic[ship_direction][0]]
+			board[ship_row - n * dic[ship_direction][0]] \
 			[ship_col - n * dic[ship_direction][1]] = "X"
 
 			exit = True
