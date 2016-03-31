@@ -15,8 +15,14 @@ def make_board(a):
 	if columns < 5:
 		columns = 5
 
+	board.append(["X"] * (columns))
 	for i in range(rows):
 		board.append(["O"] * columns)
+		board[i].insert(0, "X")
+		board[i].append("X")
+	board[rows].insert(0, "X")
+	board[rows].append("X")
+	board.append(["X"] * (columns + 2))
 
 	return board
 
@@ -45,7 +51,7 @@ def add_ship(n, board):
 	board[ship_row][ship_col] = "S"
 
 	if board[min(ship_row + 1, rows- 1)][min(ship_col + 1, columns - 1)] != "S":
-				board[min(ship_row + 1, rows- 1)][min(ship_col + 1, columns - 1)] = "X"
+		board[min(ship_row + 1, rows- 1)][min(ship_col + 1, columns - 1)] = "X"
 
 	if board[min(ship_row + 1, rows - 1)][max(ship_col - 1, 0)] != "S":	
 		board[min(ship_row + 1, rows - 1)][max(ship_col - 1, 0)] = "X"
@@ -82,7 +88,7 @@ def add_ship(n, board):
 			board[ship_row][ship_col] = "S"
 
 			if board[min(ship_row + 1, rows- 1)][min(ship_col + 1, columns - 1)] != "S":
-				board[min(ship_row + 1, rows- 1)][min(ship_col + 1, columns - 1)] = "X"
+				board[min(ship_row + 1, rows- 1)][min(ship_col + 1, columns - 1)] = "X"	
 
 			if board[min(ship_row + 1, rows - 1)][max(ship_col - 1, 0)] != "S":	
 				board[min(ship_row + 1, rows - 1)][max(ship_col - 1, 0)] = "X"
@@ -189,15 +195,16 @@ def add_ship(n, board):
 			if board[max(ship_beg_row - 1, 0)][ship_col] != "S":
 				board[max(ship_beg_row - 1, 0)][ship_col] = "X"	
 
-board = make_board(10)
+if __name__ == "__main__":
+	board = make_board(10)
 
-add_ship(7, board)
+	add_ship(7, board)
 
-'''
-S = ship tile
-X = tile next to a ship
-O = empty tile
-'''
+	'''
+	S = ship tile
+	X = tile next to a ship
+	O = empty tile
+	'''
 
-for row in board:
-		print(" ".join(row))
+	for row in board:
+			print(" ".join(row))
