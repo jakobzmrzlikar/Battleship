@@ -49,7 +49,15 @@ def add_ship(n, board):
 					space += i
 					for j in range(n - 1 - space):
 						if board[ship_row - j * dic[ship_direction][0]][ship_col - j * dic[ship_direction][1]] == "X":
-							# fix here
+							'''
+							FIX HERE!
+											    ____________________________
+							   _____                          ,\\    ___________________    \
+							  |     `------------------------'  ||  (___________________)   `|
+							  |_____.------------------------._ ||  ____________________     |
+							                                  `//__(____________________)___/
+
+							'''
 							break
 					for k in range(n):
 						board[ship_row + (space - k) * dic[ship_direction][0]]
