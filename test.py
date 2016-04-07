@@ -4,6 +4,7 @@ import time
 start = time.time()
 board = make_board(10)
 add_ship(5, board)
+add_ship(5, board)
 
 for row in board:
 		print(" ".join(row))
