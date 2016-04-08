@@ -46,6 +46,7 @@ def add_ship(n, board):
 	space = 0
 	no_space = False
 	bound = False
+	exit = False
 
 	while not exit:
 
