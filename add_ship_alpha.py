@@ -29,14 +29,17 @@ def make_board(a):
 
 def add_ship(n, board):
 
+	rows = size[0]
+	columns = size[1]
+
 	dic = {
-	# Desno
-	0: [0, -1],
 	# Levo
+	0: [0, -1],
+	# Desno
 	1: [0, 1],
-	# Dol
-	2: [-1, 0],
 	# Gor
+	2: [-1, 0],
+	# Dol
 	3: [1, 0]
 	}
 
@@ -55,9 +58,9 @@ def add_ship(n, board):
 
 		# Debug test code
 
-		ship_row = 5
+		ship_row = 6
 		ship_col = 5
-		ship_direction = 2
+		ship_direction = 3
 
 		# Če je izbrano polje še prosto
 		if board[ship_row][ship_col] == "O":
@@ -102,11 +105,19 @@ def add_ship(n, board):
 					board[ship_row - (k * dic[ship_direction][0]) - dic[ship_direction][1]] \
 					[ship_col + (k * dic[ship_direction][1]) - dic[ship_direction][0]] = "X"
 
-				board[ship_row + dic[ship_direction][0]] \
-				[ship_col + dic[ship_direction][1]] = "X"
+				if ship_direction == 0 or ship_direction == 1:
+					board[ship_row + n *dic[ship_direction][0]] \
+					[ship_col + n * dic[ship_direction][1]] = "X"
 
-				board[ship_row - n * dic[ship_direction][0]] \
-				[ship_col - n * dic[ship_direction][1]] = "X"
+					board[ship_row - dic[ship_direction][0]] \
+					[ship_col - dic[ship_direction][1]] = "X"\
 
-				# ne izriše X v kotih ladje
+				else:
+					board[ship_row + dic[ship_direction][0]] \
+						[ship_col +  dic[ship_direction][1]] = "X"
+
+					board[ship_row - n * dic[ship_direction][0]] \
+						[ship_col - n * dic[ship_direction][1]] = "X" \
+ \
+			# ne izriše X v kotih ladje
 				exit = True
