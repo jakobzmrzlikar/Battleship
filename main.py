@@ -22,8 +22,8 @@ class Battleship:
         add_ship(3, self.board2)
         add_ship(1, self.board2)
 
-        self.num_ships_1 = 8
-        self.num_ships_2 = 8
+        self.num_ships_1 = 7
+        self.num_ships_2 = 7
 
     def guess_ship(self, row, column, board):
         if row > 10 or column > 10:
