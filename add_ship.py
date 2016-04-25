@@ -1,3 +1,4 @@
+# coding=utf-8
 from random import randint
 
 size = []
@@ -7,14 +8,15 @@ def make_board(a):
 
 	rows = columns = a
 
-	size.append(rows)
-	size.append(columns)
-
 	if rows < 5:
 		rows = 5
 	if columns < 5:
 		columns = 5
 
+	size.append(rows + 2)
+	size.append(columns + 2)
+
+	# naredi board z X kot obrobo
 	board.append(["X"] * (columns))
 	for i in range(rows):
 		board.append(["O"] * columns)
@@ -26,185 +28,110 @@ def make_board(a):
 
 	return board
 
-
 def add_ship(n, board):
+
+	if n == 0:
+		return False
 
 	rows = size[0]
 	columns = size[1]
 
-	if n > rows and n > columns:
-		return False
+	dic = {
+	# Levo
+	0: [0, -1],
+	# Desno
+	1: [0, 1],
+	# Gor
+	2: [-1, 0],
+	# Dol
+	3: [1, 0]
+	}
 
-	ship_beg_row = ship_row = randint(0, rows - 1)
-	ship_beg_col = ship_col = randint(0, columns - 1)
+	
+	end = False
 
-	ship_beg_direction = ship_direction = randint(0,3)
+	while not end:
+		space = 0
+		no_space = False
+		bound = False
 
-	'''
-	0 = levo
-	1 = desno
-	2 = gor
-	3 = dol
-	'''
-	print(ship_row + 1, ship_col + 1, ship_direction)
+		# Izbere random začetno polje in smer ladje
+		ship_row = randint(1, rows - 2)
+		ship_col = randint(1, columns - 2)
+		ship_direction = randint(0,3)
 
-	board[ship_row][ship_col] = "S"
+		# Če je izbrano polje še prosto
+		if board[ship_row][ship_col] == "O":
 
-	if board[min(ship_row + 1, rows- 1)][min(ship_col + 1, columns - 1)] != "S":
-		board[min(ship_row + 1, rows- 1)][min(ship_col + 1, columns - 1)] = "X"
+			# Preveri vsa polja v dani smeri
+			for i in range(1, n):
 
-	if board[min(ship_row + 1, rows - 1)][max(ship_col - 1, 0)] != "S":	
-		board[min(ship_row + 1, rows - 1)][max(ship_col - 1, 0)] = "X"
+				# Če je polje zasedeno, si zapomni, koliko prostora je v tisti smeri.
+				if board[ship_row + i * dic[ship_direction][0]][ship_col + i * dic[ship_direction][1]] == "X":
+					space += (i - 1)
+					bound = True
 
-	if board[max(ship_row - 1, 0)][min(ship_col + 1, columns - 1)] != "S":
-		board[max(ship_row - 1, 0)][min(ship_col + 1, columns - 1)] = "X"
+					# Nato preveri še minimalno število polj v nasprotni smeri, ki je potrebno za to, da se ladjo nariše sem vmes.
+					for j in range(n - 1 - space):
 
-	if board[max(ship_row - 1, 0)][max(ship_col - 1, 0)] != "S":
-		board[max(ship_row - 1, 0)][max(ship_col - 1, 0)] = "X"
+						# Če ni dovolj prostora niti v tej smeri, si to zapomni in gre nazaj na izbiro začetnega polja.
+						if board[ship_row - (j + 1) * dic[ship_direction][0]][ship_col - (j + 1) * dic[ship_direction][1]] == "X":
+							no_space = True
+							break
 
-	if n == 1:
-		if board[ship_row][max(ship_col - 1, 0)] != "S":
-			board[ship_row][max(ship_col - 1, 0)] = "X"
+					# Če je dovolj prostora v obeh smereh za eno ladjo, jo nariše in gre ven iz vseh zank:
+					else:
+						for k in range(n):
+							board[ship_row + (space - k) * dic[ship_direction][0]] \
+							[ship_col + (space - k) * dic[ship_direction][1]] = "S"
 
-		if board[ship_row][min(ship_col + 1, columns - 1)] != "S":
-			board[ship_row][min(ship_col + 1, columns - 1)] = "X"
+							board[ship_row + (space - k) * dic[ship_direction][0] - dic[ship_direction][1]] \
+							[ship_col + (space - k) * dic[ship_direction][1] - dic[ship_direction][0]] = "X"
 
-		if board[max(ship_row - 1, 0)][ship_col] != "S":
-			board[max(ship_row - 1, 0)][ship_col] = "X"
+							board[ship_row + (space - k) * dic[ship_direction][0] + dic[ship_direction][1]] \
+							[ship_col + (space - k) * dic[ship_direction][1] + dic[ship_direction][0]] = "X"
 
-		if board[min(ship_row + 1, rows - 1)][ship_col] != "S":
-			board[min(ship_row + 1, rows - 1)][ship_col] = "X"
+						if ship_direction == 0 or ship_direction == 1:
+							board[ship_row - 1][ship_col - (n - space ) * dic[ship_direction][1]] = "X"
+							board[ship_row][ship_col - (n - space ) * dic[ship_direction][1]] = "X"
+							board[ship_row + 1][ship_col - (n - space ) * dic[ship_direction][1]] = "X"
 
-		return True
+						else:
+							board[ship_row - (n - space) * dic[ship_direction][0]][ship_col - 1] = "X"
+							board[ship_row - (n - space) * dic[ship_direction][0]][ship_col] = "X"
+							board[ship_row - (n - space) * dic[ship_direction][0]][ship_col + 1] = "X"
 
-	for i in range(1, n):
-		if ship_direction == 0:
-			ship_col -= 1
+						end = True
+					break
 
-			if ship_col < 0:
-				ship_col = i
-				ship_direction = 1
+			# če ni našel ovire, nariše ladjo ter označi X okoli nje
+			if not bound:
+				for k in range(n):
+					board[ship_row + (k * dic[ship_direction][0])] \
+					[ship_col + (k * dic[ship_direction][1])] = "S"
 
-			board[ship_row][ship_col] = "S"
+					board[ship_row + (k * dic[ship_direction][0]) + dic[ship_direction][1]] \
+					[ship_col + (k * dic[ship_direction][1]) + dic[ship_direction][0]] = "X"
 
-			if board[min(ship_row + 1, rows- 1)][min(ship_col + 1, columns - 1)] != "S":
-				board[min(ship_row + 1, rows- 1)][min(ship_col + 1, columns - 1)] = "X"	
+					board[ship_row + (k * dic[ship_direction][0]) - dic[ship_direction][1]] \
+					[ship_col + (k * dic[ship_direction][1]) - dic[ship_direction][0]] = "X"
 
-			if board[min(ship_row + 1, rows - 1)][max(ship_col - 1, 0)] != "S":	
-				board[min(ship_row + 1, rows - 1)][max(ship_col - 1, 0)] = "X"
+				if ship_direction == 0 or ship_direction == 1:
+					board[ship_row - 1][ship_col + n * dic[ship_direction][1]] = "X"
+					board[ship_row][ship_col + n * dic[ship_direction][1]] = "X"
+					board[ship_row + 1][ship_col + n * dic[ship_direction][1]] = "X"
 
-			if board[max(ship_row - 1, 0)][min(ship_col + 1, columns - 1)] != "S":
-				board[max(ship_row - 1, 0)][min(ship_col + 1, columns - 1)] = "X"
+					board[ship_row - 1][ship_col - dic[ship_direction][1]] = "X"
+					board[ship_row][ship_col - dic[ship_direction][1]] = "X"
+					board[ship_row + 1][ship_col - dic[ship_direction][1]] = "X"
+				
+				else:
+					board[ship_row - dic[ship_direction][0]][ship_col - 1] = "X"
+					board[ship_row - dic[ship_direction][0]][ship_col] = "X"
+					board[ship_row - dic[ship_direction][0]][ship_col + 1] = "X"
 
-			if board[max(ship_row - 1, 0)][max(ship_col - 1, 0)] != "S":
-				board[max(ship_row - 1, 0)][max(ship_col - 1, 0)] = "X"
+					board[ship_row + n * dic[ship_direction][0]][ship_col - 1] = "X" 
+					board[ship_row + n * dic[ship_direction][0]][ship_col] = "X"
+					board[ship_row + n * dic[ship_direction][0]][ship_col + 1] = "X"
 
-
-		elif ship_direction == 1:
-			ship_col += 1
-			if ship_col > columns - 1:
-				ship_col = columns - 1 - i
-				ship_direction = 0
-			board[ship_row][ship_col] = "S"
-
-			if board[min(ship_row + 1, rows- 1)][min(ship_col + 1, columns - 1)] != "S":
-				board[min(ship_row + 1, rows- 1)][min(ship_col + 1, columns - 1)] = "X"
-
-			if board[min(ship_row + 1, rows - 1)][max(ship_col - 1, 0)] != "S":	
-				board[min(ship_row + 1, rows - 1)][max(ship_col - 1, 0)] = "X"
-
-			if board[max(ship_row - 1, 0)][min(ship_col + 1, columns - 1)] != "S":
-				board[max(ship_row - 1, 0)][min(ship_col + 1, columns - 1)] = "X"
-
-			if board[max(ship_row - 1, 0)][max(ship_col - 1, 0)] != "S":
-				board[max(ship_row - 1, 0)][max(ship_col - 1, 0)] = "X"
-
-
-		elif ship_direction == 2:
-			ship_row -= 1
-			if ship_row < 0:
-				ship_row = i 
-				ship_direction = 3
-			board[ship_row][ship_col] = "S"
-
-			if board[min(ship_row + 1, rows- 1)][min(ship_col + 1, columns - 1)] != "S":
-				board[min(ship_row + 1, rows- 1)][min(ship_col + 1, columns - 1)] = "X"
-
-			if board[min(ship_row + 1, rows - 1)][max(ship_col - 1, 0)] != "S":	
-				board[min(ship_row + 1, rows - 1)][max(ship_col - 1, 0)] = "X"
-
-			if board[max(ship_row - 1, 0)][min(ship_col + 1, columns - 1)] != "S":
-				board[max(ship_row - 1, 0)][min(ship_col + 1, columns - 1)] = "X"
-
-			if board[max(ship_row - 1, 0)][max(ship_col - 1, 0)] != "S":
-				board[max(ship_row - 1, 0)][max(ship_col - 1, 0)] = "X"
-
-
-		else:
-			ship_row += 1
-			if ship_row > rows - 1:
-				ship_row = rows - 1 - i
-				ship_direction = 2
-			board[ship_row][ship_col] = "S"
-
-			if board[min(ship_row + 1, rows- 1)][min(ship_col + 1, columns - 1)] != "S":
-				board[min(ship_row + 1, rows- 1)][min(ship_col + 1, columns - 1)] = "X"
-
-			if board[min(ship_row + 1, rows - 1)][max(ship_col - 1, 0)] != "S":	
-				board[min(ship_row + 1, rows - 1)][max(ship_col - 1, 0)] = "X"
-
-			if board[max(ship_row - 1, 0)][min(ship_col + 1, columns - 1)] != "S":
-				board[max(ship_row - 1, 0)][min(ship_col + 1, columns - 1)] = "X"
-
-			if board[max(ship_row - 1, 0)][max(ship_col - 1, 0)] != "S":
-				board[max(ship_row - 1, 0)][max(ship_col - 1, 0)] = "X"
-
-
-	if ship_direction == 0:
-		if board[ship_row][max(ship_col - 1, 0)] != "S":
-			board[ship_row][max(ship_col - 1, 0)] = "X"
-
-		if ship_beg_direction == 0:
-			if board[ship_row][min(ship_beg_col + 1, columns - 1)] != "S":
-				board[ship_row][min(ship_beg_col + 1, columns - 1)] = "X"
-		
-
-	if ship_direction == 1:
-		if board[ship_row][min(ship_col + 1, columns - 1)] != "S":
-			board[ship_row][min(ship_col + 1, columns - 1)] = "X"
-
-		if ship_beg_direction == 1:
-			if board[ship_row][max(ship_beg_col - 1, 0)] != "S":
-				board[ship_row][max(ship_beg_col - 1, 0)] = "X"
-
-
-	if ship_direction == 2:
-		if board[max(ship_row - 1, 0)][ship_col] != "S":
-			board[max(ship_row - 1, 0)][ship_col] = "X"
-
-		if ship_beg_direction == 2:
-			if board[min(ship_beg_row + 1, rows - 1)][ship_col] != "S":
-				board[min(ship_beg_row + 1, rows - 1)][ship_col] = "X"
-
-
-	if ship_direction == 3:
-		if board[min(ship_row + 1, rows - 1)][ship_col] != "S":
-			board[min(ship_row + 1, rows - 1)][ship_col] = "X"
-
-		if ship_beg_direction == 3:
-			if board[max(ship_beg_row - 1, 0)][ship_col] != "S":
-				board[max(ship_beg_row - 1, 0)][ship_col] = "X"	
-
-if __name__ == "__main__":
-	board = make_board(10)
-
-	add_ship(7, board)
-
-	'''
-	S = ship tile
-	X = tile next to a ship
-	O = empty tile
-	'''
-
-	for row in board:
-			print(" ".join(row))
+				end = True
