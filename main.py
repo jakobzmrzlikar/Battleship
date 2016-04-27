@@ -14,7 +14,10 @@ G = guessed tile
 
 class Battleship:
     def __init__(self):
-        # makes both boards and adds ships
+        # makes both boards, adds ships and sets some variables
+        self.window = tk.Tk()
+        self.game_end = False
+
         self.player = 1
         self.board1 = make_board(10)
         self.board2 = make_board(10)
@@ -26,37 +29,63 @@ class Battleship:
         add_ship(3, self.board2)
         add_ship(1, self.board2)
 
-        self.num_ships_1 = 7
-        self.num_ships_2 = 7
+        self.player_ships = [1,2,3,3,4,5]
+        self.com_ships = [1,2,3,3,4,5]
+
+        self.num_ships_1 = len(self.player_ships)
+        self.num_ships_2 = len(self.com_ships)
 
         self.repeat_player = True
         self.repeat_com = True
 
-    def debug(self):
-        # we should do something usefull here
-        pass
 
+    def restart_game(self):
+        # it restarts the game
+        self.end_screen.destroy()
+        self.window.destroy()
+        main()
+
+    def quit_game(self):
+        # it destroys both screens
+        self.end_screen.destroy()
+        self.window.destroy()
+
+    def game_over(self, winner):
+        # makes the end screen and all the text + buttons
+        self.end_screen = tk.Tk()
+        game_end = True
+        self.repeat_com = False
+
+        if winner:
+            end_text = tk.Label(self.end_screen, text="Player 1 wins!", font=("Helvetica", 16))
+        else:
+            end_text = tk.Label(self.end_screen, text="The computer wins!", font=("Helvetica", 16))
+
+        restart = tk.Button(self.end_screen, text="Yes!", command=self.restart_game)
+        quit = tk.Button(self.end_screen, text="No!", command=self.quit_game)
+        text = tk.Label(self.end_screen, text="Do you want to play again?")
+
+        end_text.pack()
+        text.pack(side=tk.LEFT)
+        restart.pack(side=tk.LEFT)
+        quit.pack(side=tk.LEFT)
 
     def guess_player(self, row, column):
         # calls guess_ship for the player and checks the victory condition
         self.guess_ship(int(row), int(column), self.board1)
-        if self.num_ships_1 == 0:
-            print("Player 1 wins!")
-            return 0
+        if self.num_ships_2 == 0:
+            self.game_over(1)
 
     def guess_com(self):
         # calls guess_ship for the computer and checks the victory condition
         self.guess_ship(randint(1,10), randint(1,10), self.board2)
-        if self.num_ships_2 == 0:
-            print("Player 2 wins!")
-            return 0
+        if self.num_ships_1 == 0:
+            self.game_over(0)
 
     def guess_ship(self, row, column, board):
         # checks if the guessed tile is inside the board
-        if row > 10 or column > 10:
-            print("Outside of the board!")
+        if not(row > 10 or column > 10):
 
-        else:
             # it finds an S tile and you have another turn after this one
             if board[row][column] == "S":
                 pos_direct = [0,1,2,3]
@@ -65,6 +94,7 @@ class Battleship:
                 cur_2 = []
                 cur_3 = []
                 count = 0
+                ship_len = 0
 
                 # it looks in all directions for another S tile
                 # if it finds an X or a G tile, it no longer cheks that direction
@@ -122,9 +152,9 @@ class Battleship:
                                 
                         for i in range(1, len(cur_1)):                        
                             if cur_1[i - 1] == "H":
-                                board[row - 1][column - i] = "G"
+                                board[row - 1][column + i] = "G"
                                 board[row][column + i] = "D"
-                                board[row + 1][column - i] = "G"                         
+                                board[row + 1][column + i] = "G"                         
 
                         for i in range(1, len(cur_2)):         
                             if cur_2[i - 1] == "H":
@@ -154,91 +184,106 @@ class Battleship:
                         board[row + len(cur_3)][column] = "G"
                         board[row + len(cur_3)][column + 1] = "G"
 
-                        # it decreases the number of ships on the board
+                        # it decreases the number of ships on the board and removes the ship from the list of ships
                         if board == self.board1:
+                            len_ship = 1 + (len(cur_0) - 1) + (len(cur_1) - 1) + (len(cur_2) - 1) + (len(cur_3) - 1)
                             self.num_ships_2 -= 1
+                            self.com_ships.remove(len_ship)
                         else:
+                            len_ship = 1 + (len(cur_0) - 1) + (len(cur_1) - 1) + (len(cur_2) - 1) + (len(cur_3) - 1)
                             self.num_ships_1 -= 1
+                            self.player_ships.remove(len_ship)
 
-                        print("Destroyed!")
                         break
 
                 # if it found another S tile, than the guessed tile becomes an H tile
                 if len(pos_direct) > 0:
                     board[row][column] = "H"
-                    print("Hit!") 
 
             # if the guessed tile was not a ship, it changes it into a G tile and it's the opponent's turn
             elif board[row][column] in ["O", "X"]:
                 board[row][column] = "G"
                 self.repeat_player = False
                 self.repeat_com = False
-                print("Miss!")
-
 
             # if the guessed tile was previously guessed, it warns the player
             elif board[row][column] in ["H", "D", "G"]:
-                print("Already guessed there!")
+                pass
 
 
 class GUI:
     def __init__(self, game):
         # sets the window and tile size
-        self.root = tk.Tk()
         self.height, self.width = 360, 360
         self.grid = self.height / 12
         self.game = game
+        self.root = self.game.window
 
         # makes a canvas for each board and loads the board
         self.map1 = tk.Canvas(self.root, height=self.height, width=self.width)
-        self.map1.pack()
+        self.map1.bind("<Button-1>", self.mouse_guess)
+        self.map1.grid(row=0, column=0)
 
         self.map2 = tk.Canvas(self.root, height=self.height, width=self.width)
-        self.map2.pack()
+        self.map2.grid(row=1, column=0)
 
         self.load_map(self.game.board1, self.map1)
         self.load_map(self.game.board2, self.map2)
 
-        # makes a frame for all the buttons and guessing mechanism
+        # makes 2 boxes for the remaining ships
         frame = tk.Frame(self.root)
-        self.label1 = tk.Label(frame, text="Ugibaj vrstico:")
-        self.label2 = tk.Label(frame, text="Ugibaj stolpec:")
-        self.entry_row = tk.Entry(frame)
-        self.entry_col = tk.Entry(frame)
-        self.button = tk.Button(frame, text="Guess", command=self.call_guess)
-        self.debug = tk.Button(frame, text="Useless", state=tk.DISABLED, command=game.debug)
+        player_text = tk.Label(frame, text="Player's remaining ships:")
+        self.player_list = tk.Listbox(frame)
+        com_text = tk.Label(frame, text="Opponent's remaining ships:")
+        self.com_list = tk.Listbox(frame)
 
-        frame.pack()
-        self.label1.grid(row=0, column=0)
-        self.entry_row.grid(row=0, column=1)
-        self.label2.grid(row=1, column=0)
-        self.entry_col.grid(row=1, column=1)
-        self.button.grid(row=2, column=0)
-        self.debug.grid(row=3, column=0)
+        frame.grid(row=0, column=1)
+        player_text.pack()
+        self.player_list.pack()
+        com_text.pack()
+        self.com_list.pack()
+
+        self.update_list(self.game.player_ships, self.game.com_ships)
 
         self.root.mainloop()
 
-    def call_guess(self):
-        # it calls the game's guess function with the numbers in the entries
-        self.game.guess_player(self.entry_row.get(), self.entry_col.get())
+    def update_list(self, player, computer):
+        # updates the remaining ships
+        self.player_list.delete(0, tk.END)
+        self.com_list.delete(0, tk.END)
 
-        # if it's your turn, the computer can't guess
-        if not self.game.repeat_player:
-            self.game.repeat_com = True
+        for i in player:
+            self.player_list.insert(tk.END, i)
 
-            # the computer guesses until it's no longer his turn
-            while self.game.repeat_com:
-                self.game.guess_com()
+        for i in computer:
+            self.com_list.insert(tk.END, i)        
 
-            self.game.repeat_player = True
+    def mouse_guess(self, event):
+        if not self.game.game_end:
+            mouse_row = int(event.y / self.grid) 
+            mouse_col = int(event.x / self.grid)
 
-        else:
-            print("You have another guess!")
+            # it calls the game's guess function with the row and column based on the position of the mouse click
+            self.game.guess_player(mouse_row, mouse_col)
+            self.update_list(self.game.player_ships, self.game.com_ships)         
 
-        # it reloads both boards
-        self.load_map(self.game.board1, self.map1)
-        self.load_map(self.game.board2, self.map2)
+            # if it's your turn, the computer can't guess
+            if not self.game.repeat_player:
+                self.game.repeat_com = True
 
+                # the computer guesses until it's no longer his turn
+                while self.game.repeat_com:
+                    self.game.guess_com()
+
+                self.update_list(self.game.player_ships, self.game.com_ships)    
+                self.game.repeat_player = True
+
+            else:
+                print("You have another guess!")
+
+            # it reloads both boards
+            self.load_map(self.game.board1, self.map1)
+            self.load_map(self.game.board2, self.map2)
 
     def load_map(self, board, map_num):
         # it deletes the entire canvas
@@ -284,11 +329,15 @@ class GUI:
                         self.map.create_line(i * self.grid, j * self.grid, (i + 1) * self.grid, (j + 1) * self.grid, width=2)
                         self.map.create_line((i + 1) * self.grid, j * self.grid, i * self.grid, (j + 1) * self.grid, width=2)
 
+
+def main():
+    game = Battleship()
+    gui = GUI(game)
+
 # it initiates the game
 start = time.time()
 
-game = Battleship()
-gui = GUI(game)
+main()
 
 end = time.time() - start
 print("\n" + str(end) + "s")

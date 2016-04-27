@@ -2,6 +2,4 @@
 
 * Dodaj oštevilčeno tabelo.
 
-* Lahko iščeš s klikanjem.
-
-* Katere ladje moraš še najti.
+* Kako se povečuje število in dolžina ladij v povezavi z velikostjo tabele

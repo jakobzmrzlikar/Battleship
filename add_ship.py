@@ -16,7 +16,7 @@ def make_board(a):
 	size.append(rows + 2)
 	size.append(columns + 2)
 
-	# naredi board z X kot obrobo
+	# it makes a board with a border of X tiles
 	board.append(["X"] * (columns))
 	for i in range(rows):
 		board.append(["O"] * columns)
@@ -37,13 +37,13 @@ def add_ship(n, board):
 	columns = size[1]
 
 	dic = {
-	# Levo
+	# Left
 	0: [0, -1],
-	# Desno
+	# Right
 	1: [0, 1],
-	# Gor
+	# Up
 	2: [-1, 0],
-	# Dol
+	# Down
 	3: [1, 0]
 	}
 
@@ -55,31 +55,31 @@ def add_ship(n, board):
 		no_space = False
 		bound = False
 
-		# Izbere random začetno polje in smer ladje
+		# it chooses a random tile and ship direction
 		ship_row = randint(1, rows - 2)
 		ship_col = randint(1, columns - 2)
 		ship_direction = randint(0,3)
 
-		# Če je izbrano polje še prosto
+		# if the selected tile is empty
 		if board[ship_row][ship_col] == "O":
 
-			# Preveri vsa polja v dani smeri
+			# it checks all the tiles in the chosen direction
 			for i in range(1, n):
 
-				# Če je polje zasedeno, si zapomni, koliko prostora je v tisti smeri.
+				# If the ship can't fit in that direction, it remembers the space left
 				if board[ship_row + i * dic[ship_direction][0]][ship_col + i * dic[ship_direction][1]] == "X":
 					space += (i - 1)
 					bound = True
 
-					# Nato preveri še minimalno število polj v nasprotni smeri, ki je potrebno za to, da se ladjo nariše sem vmes.
+					# it checks the tiles in the opposite direction, needed to fit the ship
 					for j in range(n - 1 - space):
 
-						# Če ni dovolj prostora niti v tej smeri, si to zapomni in gre nazaj na izbiro začetnega polja.
+						# if there's not enugh space even in this direction, it remembers that end exits the loop
 						if board[ship_row - (j + 1) * dic[ship_direction][0]][ship_col - (j + 1) * dic[ship_direction][1]] == "X":
 							no_space = True
 							break
 
-					# Če je dovolj prostora v obeh smereh za eno ladjo, jo nariše in gre ven iz vseh zank:
+					# if there's enough space it draws the ship and exits from the loop
 					else:
 						for k in range(n):
 							board[ship_row + (space - k) * dic[ship_direction][0]] \
@@ -104,7 +104,7 @@ def add_ship(n, board):
 						end = True
 					break
 
-			# če ni našel ovire, nariše ladjo ter označi X okoli nje
+			# if it didn't find an obstacle it draws the ship and exits the loop
 			if not bound:
 				for k in range(n):
 					board[ship_row + (k * dic[ship_direction][0])] \
