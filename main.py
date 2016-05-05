@@ -25,12 +25,10 @@ class Battleship:
             add_ship(i, self.board1)
             add_ship(i, self.board2)
         add_ship(3, self.board1)
-        add_ship(1, self.board1)
         add_ship(3, self.board2)
-        add_ship(1, self.board2)
 
-        self.player_ships = [1,2,3,3,4,5]
-        self.com_ships = [1,2,3,3,4,5]
+        self.player_ships = [2,3,3,4,5]
+        self.com_ships = [2,3,3,4,5]
 
         self.num_ships_1 = len(self.player_ships)
         self.num_ships_2 = len(self.com_ships)
