@@ -29,5 +29,7 @@ start = time.time()
 game = Battleship()
 ai = AI(game)
 
+ai.guess(ai.board)
+
 end = time.time()-start
 print("\n" + str(end) + "s")

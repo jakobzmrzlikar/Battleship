@@ -15,7 +15,8 @@ G = guessed tile
 class AI:
     def __init__(self, game):
         self.game = game
-        self.board = self.game.board1
+        self.board = make_board(10)
+        self.guess_board = []
 
     def statistical_guess(self, n):
         print("statistical_guess")
@@ -46,7 +47,8 @@ class AI:
         max_list = []
         for i in range(len(board)):
             self.guess_board.append([0 for j in range(len(board))])
-        for i in game.com_ships:
+        #napravi statistical guess za vse ladje
+        for i in self.game.com_ships:
             self.statistical_guess(i)
 
         for i in range(len(self.guess_board)):
@@ -57,25 +59,23 @@ class AI:
         for i in range(len(self.guess_board)):
             for j in range(len(self.guess_board)):
                 if self.guess_board[i][j] == max(max_list):
-                    print(max_list)
-                    max_list.remove(self.guess_board[i][j])
-                    print(max_list)
                     del self.guess_board[i][j]
-                    self.game.guess_ship(i, j, self.game.board2)
-                    print(i, j)
+                    self.game.guess_ship(i, j, self.game.board_com)
+                    print("coords:", i, j)
                     random_flag = True
                     break
             if random_flag:
-                print ("HELLO THERE I AM NEVER HERE HAHAHAHAHAUO> HFJO")
                 break
-        print(max_list)                
-        print(max(max_list))
+
+        print("max_list:", max_list)                
+        print("max:", max(max_list))
+        print("guess_board: ")
         for row in self.guess_board:
             print("".join(str(row)))
-        print()        
+        print()
+        print("board: ")        
         for row in board:
             print(" ".join(row))
-        print()
 
 
 
@@ -334,7 +334,7 @@ class GUI:
                 # the computer guesses until it's no longer his turn
                 while self.game.repeat_com:
                     print("Computer is guessing")
-                    self.AI.guess(self.game.board1)
+                    self.AI.guess(self.game.board_player)
                     time.sleep(0.05)
 
                 self.update_list(self.game.player_ships, self.game.com_ships)    
