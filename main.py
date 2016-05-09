@@ -86,19 +86,19 @@ class Battleship:
         self.game_end = False
 
         self.player = 1
-        self.board1 = make_board(10)
-        self.board2 = make_board(10)
+        self.board_player = make_board(10)
+        self.board_com = make_board(10)
         for i in range(2, 6):
-            add_ship(i, self.board1)
-            add_ship(i, self.board2)
-        add_ship(3, self.board1)
-        add_ship(3, self.board2)
+            add_ship(i, self.board_player)
+            add_ship(i, self.board_com)
+        add_ship(3, self.board_player)
+        add_ship(3, self.board_com)
 
         self.player_ships = [2,3,3,4,5]
         self.com_ships = [2,3,3,4,5]
 
-        self.num_ships_1 = len(self.player_ships)
-        self.num_ships_2 = len(self.com_ships)
+        self.num_ships_player = len(self.player_ships)
+        self.num_ships_com = len(self.com_ships)
 
         self.repeat_player = True
         self.repeat_com = True
@@ -137,8 +137,8 @@ class Battleship:
 
     def guess_player(self, row, column):
         # calls guess_ship for the player and checks the victory condition
-        self.guess_ship(int(row), int(column), self.board1)
-        if self.num_ships_2 == 0:
+        self.guess_ship(int(row), int(column), self.board_player)
+        if self.num_ships_com == 0:
             self.game_over(1)
 
     def guess_ship(self, row, column, board):
@@ -244,13 +244,13 @@ class Battleship:
                         board[row + len(cur_3)][column + 1] = "G"
 
                         # it decreases the number of ships on the board and removes the ship from the list of ships
-                        if board == self.board1:
+                        if board == self.board_player:
                             len_ship = 1 + (len(cur_0) - 1) + (len(cur_1) - 1) + (len(cur_2) - 1) + (len(cur_3) - 1)
-                            self.num_ships_2 -= 1
+                            self.num_ships_com -= 1
                             self.com_ships.remove(len_ship)
                         else:
                             len_ship = 1 + (len(cur_0) - 1) + (len(cur_1) - 1) + (len(cur_2) - 1) + (len(cur_3) - 1)
-                            self.num_ships_1 -= 1
+                            self.num_ships_player -= 1
                             self.player_ships.remove(len_ship)
 
                         break
@@ -280,15 +280,15 @@ class GUI:
         self.AI = AI
 
         # makes a canvas for each board and loads the board
-        self.map1 = tk.Canvas(self.root, height=self.height, width=self.width)
-        self.map1.bind("<Button-1>", self.mouse_guess)
-        self.map1.grid(row=0, column=0)
+        self.map_player = tk.Canvas(self.root, height=self.height, width=self.width)
+        self.map_player.bind("<Button-1>", self.mouse_guess)
+        self.map_player.grid(row=0, column=0)
 
-        self.map2 = tk.Canvas(self.root, height=self.height, width=self.width)
-        self.map2.grid(row=1, column=0)
+        self.map_com = tk.Canvas(self.root, height=self.height, width=self.width)
+        self.map_com.grid(row=1, column=0)
 
-        self.load_map(self.game.board1, self.map1)
-        self.load_map(self.game.board2, self.map2)
+        self.load_map(self.game.board_player, self.map_player)
+        self.load_map(self.game.board_com, self.map_com)
 
         # makes 2 boxes for the remaining ships
         frame = tk.Frame(self.root)
@@ -344,8 +344,8 @@ class GUI:
                 print("You have another guess!")
 
             # it reloads both boards
-            self.load_map(self.game.board1, self.map1)
-            self.load_map(self.game.board2, self.map2)
+            self.load_map(self.game.board_player, self.map_player)
+            self.load_map(self.game.board_com, self.map_com)
 
     def load_map(self, board, map_num):
         # it deletes the entire canvas
@@ -367,7 +367,7 @@ class GUI:
         self.map.create_rectangle((len(board) - 1) * self.grid, 0, len(board) * self.grid, len(board) * self.grid, fill="black")
 
         # it doesn't draw the S tiles on the computer's board, so that the player can't cheat
-        if self.map == self.map1:
+        if self.map == self.map_player:
             for i in range(1, len(board)-1):
                 for j in range(1, len(board)-1):
                     if board[j][i] == "H":
