@@ -12,6 +12,73 @@ D = destroyed ship tile
 G = guessed tile
 '''
 
+class AI:
+    def __init__(self, game):
+        self.game = game
+        self.board = self.game.board1
+
+    def statistical_guess(self, n):
+        print("statistical_guess")
+        for i in range (1, len(self.board)-1):
+            for j in range(1, len(self.board[i])-1):
+                if self.board[i][j] == "O":
+                    obstructed = False
+                    for k in range(n):
+                        if not self.board[i][j+k] == "O":
+                            obstructed = True
+                            break
+                    if not obstructed:
+                        for k in range(n):
+                            self.guess_board[i][j+k] += 1
+
+                    obstructed = False
+                    for k in range(n):
+                        if not self.board[i+k][j] == "O":
+                            obstructed = True
+                            break
+                    if not obstructed:
+                        for k in range(n):
+                            self.guess_board[i+k][j] += 1
+
+    def guess(self, board):
+        random_flag = False
+        self.guess_board = []
+        max_list = []
+        for i in range(len(board)):
+            self.guess_board.append([0 for j in range(len(board))])
+        for i in game.com_ships:
+            self.statistical_guess(i)
+
+        for i in range(len(self.guess_board)):
+            max_all = 0
+            max_cur = max(self.guess_board[i])
+            max_list.append(max_cur)
+
+        for i in range(len(self.guess_board)):
+            for j in range(len(self.guess_board)):
+                if self.guess_board[i][j] == max(max_list):
+                    print(max_list)
+                    max_list.remove(self.guess_board[i][j])
+                    print(max_list)
+                    del self.guess_board[i][j]
+                    self.game.guess_ship(i, j, self.game.board2)
+                    print(i, j)
+                    random_flag = True
+                    break
+            if random_flag:
+                print ("HELLO THERE I AM NEVER HERE HAHAHAHAHAUO> HFJO")
+                break
+        print(max_list)                
+        print(max(max_list))
+        for row in self.guess_board:
+            print("".join(str(row)))
+        print()        
+        for row in board:
+            print(" ".join(row))
+        print()
+
+
+
 class Battleship:
     def __init__(self):
         # makes both boards, adds ships and sets some variables
@@ -73,12 +140,6 @@ class Battleship:
         self.guess_ship(int(row), int(column), self.board1)
         if self.num_ships_2 == 0:
             self.game_over(1)
-
-    def guess_com(self):
-        # calls guess_ship for the computer and checks the victory condition
-        self.guess_ship(randint(1,10), randint(1,10), self.board2)
-        if self.num_ships_1 == 0:
-            self.game_over(0)
 
     def guess_ship(self, row, column, board):
         # checks if the guessed tile is inside the board
@@ -210,12 +271,13 @@ class Battleship:
 
 
 class GUI:
-    def __init__(self, game):
+    def __init__(self, game, AI):
         # sets the window and tile size
         self.height, self.width = 360, 360
         self.grid = self.height / 12
         self.game = game
         self.root = self.game.window
+        self.AI = AI
 
         # makes a canvas for each board and loads the board
         self.map1 = tk.Canvas(self.root, height=self.height, width=self.width)
@@ -271,7 +333,9 @@ class GUI:
 
                 # the computer guesses until it's no longer his turn
                 while self.game.repeat_com:
-                    self.game.guess_com()
+                    print("Computer is guessing")
+                    self.AI.guess(self.game.board1)
+                    time.sleep(0.05)
 
                 self.update_list(self.game.player_ships, self.game.com_ships)    
                 self.game.repeat_player = True
@@ -328,14 +392,11 @@ class GUI:
                         self.map.create_line((i + 1) * self.grid, j * self.grid, i * self.grid, (j + 1) * self.grid, width=2)
 
 
-def main():
+if __name__ == "__main__":
+    # it initiates the game
+    start = time.time()
     game = Battleship()
-    gui = GUI(game)
-
-# it initiates the game
-start = time.time()
-
-main()
-
-end = time.time() - start
-print("\n" + str(end) + "s")
+    ai = AI(game)
+    gui = GUI(game, ai)
+    end = time.time() - start
+    print("\n" + str(end) + "s")
