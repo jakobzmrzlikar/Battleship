@@ -15,68 +15,67 @@ G = guessed tile
 class AI:
     def __init__(self, game):
         self.game = game
-        self.board = make_board(10)
-        self.guess_board = []
+        self.mode = self.game.style
 
     def statistical_guess(self, n):
-        print("statistical_guess")
-        for i in range (1, len(self.board)-1):
-            for j in range(1, len(self.board[i])-1):
-                if self.board[i][j] == "O":
+        # if self.mode = "random":
+        for i in range (1, len(self.game.board_com)-1):
+            for j in range(1, len(self.game.board_com[i])-1):
+                if self.game.board_com[i][j] not in ["G", "H", "D"]:
                     obstructed = False
-                    for k in range(n):
-                        if not self.board[i][j+k] == "O":
+                    for k in range(1, n):
+                        if self.game.board_com[i][j+k] in ["G", "H", "D"] or j+k > (len(self.game.board_com) - 2):
                             obstructed = True
                             break
                     if not obstructed:
                         for k in range(n):
                             self.guess_board[i][j+k] += 1
 
-                    obstructed = False
-                    for k in range(n):
-                        if not self.board[i+k][j] == "O":
-                            obstructed = True
+        for i in range (1, len(self.game.board_com)-1):
+            for j in range(1, len(self.game.board_com[i])-1):
+                if self.game.board_com[i][j] not in ["G", "H", "D"]:
+                    obstructed_2 = False
+                    for k in range(1, n):
+                        if self.game.board_com[i+k][j] in ["G", "H", "D"] or i+k > (len(self.game.board_com) - 2):
+                            obstructed_2 = True
                             break
-                    if not obstructed:
+                    if not obstructed_2:
                         for k in range(n):
                             self.guess_board[i+k][j] += 1
 
+        # else:
+            # pass
+
     def guess(self, board):
-        random_flag = False
         self.guess_board = []
         max_list = []
-        for i in range(len(board)):
-            self.guess_board.append([0 for j in range(len(board))])
-        #napravi statistical guess za vse ladje
-        for i in self.game.com_ships:
-            self.statistical_guess(i)
+        max_all = 0
+        self.pos_guess = []
+
+        # if self.mode == "random":
+        for i in range(len(self.game.board_com)):
+            self.guess_board.append([0 for j in range(len(self.game.board_com))])
+
+        for k in self.game.player_ships:
+            self.statistical_guess(k)
+
+        for row in self.guess_board:
+            print(str(row))
 
         for i in range(len(self.guess_board)):
-            max_all = 0
-            max_cur = max(self.guess_board[i])
-            max_list.append(max_cur)
+            max_list.append(max(self.guess_board[i]))
+            max_all = max(max_list)
 
         for i in range(len(self.guess_board)):
             for j in range(len(self.guess_board)):
-                if self.guess_board[i][j] == max(max_list):
-                    del self.guess_board[i][j]
-                    self.game.guess_ship(i, j, self.game.board_com)
-                    print("coords:", i, j)
-                    random_flag = True
-                    break
-            if random_flag:
-                break
+                if self.guess_board[i][j] == max_all:
+                    self.pos_guess.append([i,j])
 
-        print("max_list:", max_list)                
-        print("max:", max(max_list))
-        print("guess_board: ")
-        for row in self.guess_board:
-            print("".join(str(row)))
-        print()
-        print("board: ")        
-        for row in board:
-            print(" ".join(row))
+        pos = randint(0, len(self.pos_guess) - 1)
+        self.game.guess_ship(self.pos_guess[pos][0], self.pos_guess[pos][1], board)
 
+        # else:
+            # pass            
 
 
 class Battleship:
@@ -103,6 +102,7 @@ class Battleship:
         self.repeat_player = True
         self.repeat_com = True
 
+        self.style = "random"
 
     def restart_game(self):
         # it restarts the game
@@ -194,6 +194,7 @@ class Battleship:
 
                     # if there is no connected S tiles, it goes and changes all the connected H tiles into D tiles and draws a border of G tiles
                     if len(pos_direct) == 0:
+                        self.style = "random"
 
                         board[row - 1][column] = "G"
                         board[row + 1][column] = "G"
@@ -258,6 +259,7 @@ class Battleship:
                 # if it found another S tile, than the guessed tile becomes an H tile
                 if len(pos_direct) > 0:
                     board[row][column] = "H"
+                    self.style = "ship"
 
             # if the guessed tile was not a ship, it changes it into a G tile and it's the opponent's turn
             elif board[row][column] in ["O", "X"]:
@@ -333,15 +335,12 @@ class GUI:
 
                 # the computer guesses until it's no longer his turn
                 while self.game.repeat_com:
-                    print("Computer is guessing")
-                    self.AI.guess(self.game.board_player)
+                    self.AI.guess(self.game.board_com)
+                    self.AI.mode = self.game.style
                     time.sleep(0.05)
 
                 self.update_list(self.game.player_ships, self.game.com_ships)    
                 self.game.repeat_player = True
-
-            else:
-                print("You have another guess!")
 
             # it reloads both boards
             self.load_map(self.game.board_player, self.map_player)
@@ -392,11 +391,16 @@ class GUI:
                         self.map.create_line((i + 1) * self.grid, j * self.grid, i * self.grid, (j + 1) * self.grid, width=2)
 
 
-if __name__ == "__main__":
+def main():
     # it initiates the game
-    start = time.time()
     game = Battleship()
     ai = AI(game)
     gui = GUI(game, ai)
-    end = time.time() - start
-    print("\n" + str(end) + "s")
+
+
+start = time.time()  
+
+main()
+
+end = time.time() - start
+print("\n" + str(end) + "s")
