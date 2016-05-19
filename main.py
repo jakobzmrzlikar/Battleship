@@ -17,34 +17,66 @@ class AI:
         self.game = game
         self.mode = self.game.style
 
+
     def statistical_guess(self, n):
-        # if self.mode = "random":
-        for i in range (1, len(self.game.board_com)-1):
-            for j in range(1, len(self.game.board_com[i])-1):
-                if self.game.board_com[i][j] not in ["G", "H", "D"]:
-                    obstructed = False
-                    for k in range(1, n):
-                        if self.game.board_com[i][j+k] in ["G", "H", "D"] or j+k > (len(self.game.board_com) - 2):
-                            obstructed = True
-                            break
-                    if not obstructed:
-                        for k in range(n):
-                            self.guess_board[i][j+k] += 1
+        
 
-        for i in range (1, len(self.game.board_com)-1):
-            for j in range(1, len(self.game.board_com[i])-1):
-                if self.game.board_com[i][j] not in ["G", "H", "D"]:
-                    obstructed_2 = False
-                    for k in range(1, n):
-                        if self.game.board_com[i+k][j] in ["G", "H", "D"] or i+k > (len(self.game.board_com) - 2):
-                            obstructed_2 = True
+        if self.mode == "hit":
+            #če je prej zadel(je na pravi premici)
+            if self.game.hit > 2:
+                #če je v tej smeri še prostor
+                if not self.game.wrong_dir:
+                    for i in range(2, 5):
+                    #če naslednje polje ni prosto:
+                        if self.game.board_com[self.guess_coords[0]+compass[0]*i, self.guess_coords[1]+compass[1]*i] in ["G", "H", "D"]:
+                            self.game.wrong_dir = True
                             break
-                    if not obstructed_2:
-                        for k in range(n):
-                            self.guess_board[i+k][j] += 1
+                        #če je naslednje polje prosto
+                        else:
+                            self.game.guess_ship(self.guess_coords[0]+compass[0]*i, self.guess_coords[1]+compass[1]*i, self.game.board_com)
+                #če v tej smeri ni več prostora (ampak je na pravi premici) gre v nasprotno smer
+                elif wrong_dir:
+                    for i in range(2, 5):
+                        self.game.guess_ship(self.guess_coords[0]-compass[0]*i, self.guess_coords[1]-compass[1]*i, self.game.board_com)
+            #če prej v tej smeri ni zadel            
+            else:
+                compass_array = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+                for i in compass_array:
+                    if self.game.board_com[self.guess_coords[0]+compass_array[i][0], self.guess_coords[1]+compass_array[i][1]] in ["G", "H", "D"]:
+                        del(compass_array[i])    
+                compass = compass_array[randint(0, len(compass_array)-1)]
+                while len(compass_array) > 0:
+                    self.game.guess_ship(self.guess_coords[0]+compass[0], self.guess_coords[1]+compass[1], self.game.board_com)
 
-        # else:
-            # pass
+
+
+        if self.mode == "statistical":
+            for i in range (1, len(self.game.board_com)-1):
+                for j in range(1, len(self.game.board_com[i])-1):
+                    if self.game.board_com[i][j] not in ["G", "H", "D"]:
+                        obstructed = False
+                        for k in range(1, n):
+                            if self.game.board_com[i][j+k] in ["G", "H", "D"] or j+k > (len(self.game.board_com) - 2):
+                                obstructed = True
+                                break
+                        if not obstructed:
+                            for k in range(n):
+                                self.guess_board[i][j+k] += 1
+
+            for i in range (1, len(self.game.board_com)-1):
+                for j in range(1, len(self.game.board_com[i])-1):
+                    if self.game.board_com[i][j] not in ["G", "H", "D"]:
+                        obstructed_2 = False
+                        for k in range(1, n):
+                            if self.game.board_com[i+k][j] in ["G", "H", "D"] or i+k > (len(self.game.board_com) - 2):
+                                obstructed_2 = True
+                                break
+                        if not obstructed_2:
+                            for k in range(n):
+                                self.guess_board[i+k][j] += 1
+
+        else:
+            pass
 
     def guess(self, board):
         self.guess_board = []
@@ -61,6 +93,7 @@ class AI:
 
         for row in self.guess_board:
             print(str(row))
+        print()
 
         for i in range(len(self.guess_board)):
             max_list.append(max(self.guess_board[i]))
@@ -72,7 +105,10 @@ class AI:
                     self.pos_guess.append([i,j])
 
         pos = randint(0, len(self.pos_guess) - 1)
-        self.game.guess_ship(self.pos_guess[pos][0], self.pos_guess[pos][1], board)
+        self.guess_coords = self.pos_guess[pos]
+        self.game.guess_ship(self.guess_coords[0], self.guess_coords[1], board)
+        print(self.guess_coords)
+        
 
         # else:
             # pass            
@@ -102,7 +138,9 @@ class Battleship:
         self.repeat_player = True
         self.repeat_com = True
 
-        self.style = "random"
+        self.hit = 0
+        self.wrong_dir = False
+        self.style = "statistical"
 
     def restart_game(self):
         # it restarts the game
@@ -147,6 +185,7 @@ class Battleship:
 
             # it finds an S tile and you have another turn after this one
             if board[row][column] == "S":
+
                 pos_direct = [0,1,2,3]
                 cur_0 = []
                 cur_1 = []
@@ -194,7 +233,7 @@ class Battleship:
 
                     # if there is no connected S tiles, it goes and changes all the connected H tiles into D tiles and draws a border of G tiles
                     if len(pos_direct) == 0:
-                        self.style = "random"
+                        #self.style = "random"
 
                         board[row - 1][column] = "G"
                         board[row + 1][column] = "G"
@@ -259,13 +298,19 @@ class Battleship:
                 # if it found another S tile, than the guessed tile becomes an H tile
                 if len(pos_direct) > 0:
                     board[row][column] = "H"
-                    self.style = "ship"
+                    #self.style = "ship"
+                    self.style = "hit"
+                    self.hit += 1
 
             # if the guessed tile was not a ship, it changes it into a G tile and it's the opponent's turn
             elif board[row][column] in ["O", "X"]:
                 board[row][column] = "G"
                 self.repeat_player = False
                 self.repeat_com = False
+
+                if self.hit > 2:
+                    self.wrong_dir = True
+                self.hit = 0
 
             # if the guessed tile was previously guessed, it warns the player
             elif board[row][column] in ["H", "D", "G"]:
