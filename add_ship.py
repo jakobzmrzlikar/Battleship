@@ -83,7 +83,7 @@ def add_ship(n, board):
 					else:
 						for k in range(n):
 							board[ship_row + (space - k) * dic[ship_direction][0]] \
-							[ship_col + (space - k) * dic[ship_direction][1]] = "S"
+								[ship_col + (space - k) * dic[ship_direction][1]] = "S"
 
 							board[ship_row + (space - k) * dic[ship_direction][0] - dic[ship_direction][1]] \
 							[ship_col + (space - k) * dic[ship_direction][1] - dic[ship_direction][0]] = "X"

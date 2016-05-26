@@ -2,6 +2,7 @@ import tkinter as tk
 from add_ship import make_board, add_ship
 import time
 from random import randint
+from AI import AI
 
 '''
 S = ship tile
@@ -11,107 +12,6 @@ H = hit ship tile
 D = destroyed ship tile
 G = guessed tile
 '''
-
-class AI:
-    def __init__(self, game):
-        self.game = game
-        self.mode = self.game.style
-
-
-    def statistical_guess(self, n):
-        
-
-        if self.mode == "hit":
-            #če je prej zadel(je na pravi premici)
-            if self.game.hit > 2:
-                #če je v tej smeri še prostor
-                if not self.game.wrong_dir:
-                    for i in range(2, 5):
-                    #če naslednje polje ni prosto:
-                        if self.game.board_com[self.guess_coords[0]+compass[0]*i, self.guess_coords[1]+compass[1]*i] in ["G", "H", "D"]:
-                            self.game.wrong_dir = True
-                            break
-                        #če je naslednje polje prosto
-                        else:
-                            self.game.guess_ship(self.guess_coords[0]+compass[0]*i, self.guess_coords[1]+compass[1]*i, self.game.board_com)
-                #če v tej smeri ni več prostora (ampak je na pravi premici) gre v nasprotno smer
-                elif wrong_dir:
-                    for i in range(2, 5):
-                        self.game.guess_ship(self.guess_coords[0]-compass[0]*i, self.guess_coords[1]-compass[1]*i, self.game.board_com)
-            #če prej v tej smeri ni zadel            
-            else:
-                compass_array = [[0, 1], [0, -1], [1, 0], [-1, 0]]
-                for i in compass_array:
-                    if self.game.board_com[self.guess_coords[0]+i[0]][self.guess_coords[1]+i[-1]] in ["G", "H", "D"]:
-                        del(i)    
-                compass = compass_array[randint(0, len(compass_array)-1)]
-                while len(compass_array) > 0:
-                    self.game.guess_ship(self.guess_coords[0]+compass[0], self.guess_coords[1]+compass[1], self.game.board_com)
-
-
-
-        if self.mode == "statistical":
-            for i in range (1, len(self.game.board_com)-1):
-                for j in range(1, len(self.game.board_com[i])-1):
-                    if self.game.board_com[i][j] not in ["G", "H", "D"]:
-                        obstructed = False
-                        for k in range(1, n):
-                            if self.game.board_com[i][j+k] in ["G", "H", "D"] or j+k > (len(self.game.board_com) - 2):
-                                obstructed = True
-                                break
-                        if not obstructed:
-                            for k in range(n):
-                                self.guess_board[i][j+k] += 1
-
-            for i in range (1, len(self.game.board_com)-1):
-                for j in range(1, len(self.game.board_com[i])-1):
-                    if self.game.board_com[i][j] not in ["G", "H", "D"]:
-                        obstructed_2 = False
-                        for k in range(1, n):
-                            if self.game.board_com[i+k][j] in ["G", "H", "D"] or i+k > (len(self.game.board_com) - 2):
-                                obstructed_2 = True
-                                break
-                        if not obstructed_2:
-                            for k in range(n):
-                                self.guess_board[i+k][j] += 1
-
-        else:
-            pass
-
-    def guess(self, board):
-        self.guess_board = []
-        max_list = []
-        max_all = 0
-        self.pos_guess = []
-
-        # if self.mode == "random":
-        for i in range(len(self.game.board_com)):
-            self.guess_board.append([0 for j in range(len(self.game.board_com))])
-
-        for k in self.game.player_ships:
-            self.statistical_guess(k)
-
-        for row in self.guess_board:
-            print(str(row))
-        print()
-
-        for i in range(len(self.guess_board)):
-            max_list.append(max(self.guess_board[i]))
-            max_all = max(max_list)
-
-        for i in range(len(self.guess_board)):
-            for j in range(len(self.guess_board)):
-                if self.guess_board[i][j] == max_all:
-                    self.pos_guess.append([i,j])
-
-        pos = randint(0, len(self.pos_guess) - 1)
-        self.guess_coords = self.pos_guess[pos]
-        self.game.guess_ship(self.guess_coords[0], self.guess_coords[1], board)
-        print(self.guess_coords)
-        
-
-        # else:
-            # pass            
 
 
 class Battleship:
@@ -293,14 +193,21 @@ class Battleship:
                             self.num_ships_player -= 1
                             self.player_ships.remove(len_ship)
 
+                        self.wrong_dir = False
+                        self.hit = 0
+                        self.previous_miss = False
                         break
 
                 # if it found another S tile, than the guessed tile becomes an H tile
                 if len(pos_direct) > 0:
                     board[row][column] = "H"
-                    #self.style = "ship"
+
+                    if self.hit == 0 and not self.wrong_dir:
+                        self.hit_coords = [row, column]
+
                     self.style = "hit"
                     self.hit += 1
+                    self.previous_miss = False
 
             # if the guessed tile was not a ship, it changes it into a G tile and it's the opponent's turn
             elif board[row][column] in ["O", "X"]:
@@ -311,6 +218,7 @@ class Battleship:
                 if self.hit > 2:
                     self.wrong_dir = True
                 self.hit = 0
+                self.previous_miss = True
 
             # if the guessed tile was previously guessed, it warns the player
             elif board[row][column] in ["H", "D", "G"]:
