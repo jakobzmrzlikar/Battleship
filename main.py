@@ -42,8 +42,8 @@ class AI:
             else:
                 compass_array = [[0, 1], [0, -1], [1, 0], [-1, 0]]
                 for i in compass_array:
-                    if self.game.board_com[self.guess_coords[0]+compass_array[i][0], self.guess_coords[1]+compass_array[i][1]] in ["G", "H", "D"]:
-                        del(compass_array[i])    
+                    if self.game.board_com[self.guess_coords[0]+i[0]][self.guess_coords[1]+i[-1]] in ["G", "H", "D"]:
+                        del(i)    
                 compass = compass_array[randint(0, len(compass_array)-1)]
                 while len(compass_array) > 0:
                     self.game.guess_ship(self.guess_coords[0]+compass[0], self.guess_coords[1]+compass[1], self.game.board_com)
@@ -445,7 +445,8 @@ def main():
 
 start = time.time()  
 
-main()
+if __name__ == "__main__":
+    main()
 
 end = time.time() - start
 print("\n" + str(end) + "s")
