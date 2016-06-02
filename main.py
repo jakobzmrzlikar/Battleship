@@ -196,6 +196,7 @@ class Battleship:
                         self.wrong_dir = False
                         self.hit = 0
                         self.previous_miss = False
+                        self.style = "statistical"
                         break
 
                 # if it found another S tile, than the guessed tile becomes an H tile
@@ -217,7 +218,6 @@ class Battleship:
 
                 if self.hit > 2:
                     self.wrong_dir = True
-                self.hit = 0
                 self.previous_miss = True
 
             # if the guessed tile was previously guessed, it warns the player
