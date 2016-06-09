@@ -193,10 +193,14 @@ class Battleship:
                             self.num_ships_player -= 1
                             self.player_ships.remove(len_ship)
 
-                        self.wrong_dir = False
-                        self.hit = 0
-                        self.previous_miss = False
-                        self.style = "statistical"
+                        if board == self.board_com:
+                            if self.num_ships_player == 0:
+                                self.game_over(0)
+                            self.wrong_dir = False
+                            self.hit = 0
+                            self.previous_miss = False
+                            self.style = "statistical"
+
                         break
 
                 # if it found another S tile, than the guessed tile becomes an H tile
@@ -206,9 +210,10 @@ class Battleship:
                     if self.hit == 0 and not self.wrong_dir:
                         self.hit_coords = [row, column]
 
-                    self.style = "hit"
-                    self.hit += 1
-                    self.previous_miss = False
+                    if board == self.board_com:
+                        self.style = "hit"
+                        self.hit += 1
+                        self.previous_miss = False
 
             # if the guessed tile was not a ship, it changes it into a G tile and it's the opponent's turn
             elif board[row][column] in ["O", "X"]:
@@ -216,9 +221,10 @@ class Battleship:
                 self.repeat_player = False
                 self.repeat_com = False
 
-                if self.hit > 2:
-                    self.wrong_dir = True
-                self.previous_miss = True
+                if board == self.board_com:
+                    if self.hit > 2:
+                        self.wrong_dir = True
+                    self.previous_miss = True
 
             # if the guessed tile was previously guessed, it warns the player
             elif board[row][column] in ["H", "D", "G"]:
@@ -300,6 +306,7 @@ class GUI:
             self.load_map(self.game.board_com, self.map_com)
 
     def load_map(self, board, map_num):
+        """ghfghf"""
         # it deletes the entire canvas
         self.map = map_num
         self.map.delete("all")
