@@ -6,7 +6,6 @@ class AI:
         self.game = game
         self.mode = "statistical"
         self.hit = 0
-        self.wrong_dir = False
         self.compass = None
 
     def find_coords(self, i):
@@ -18,6 +17,8 @@ class AI:
             self.guess_coords = [self.hit_coords[0], self.hit_coords[-1] + 1]
         elif i == 3:
             self.guess_coords = [self.hit_coords[0], self.hit_coords[-1] - 1]
+        if self.game.board_com[self.guess_coords[0]][self.guess_coords[1]] in ["G", "H"]:
+            self.guess_board[self.guess_coords[0]][self.guess_coords[1]] = 0
 
 
 
@@ -29,7 +30,7 @@ class AI:
         #če je prej zadel(je na pravi premici)
         if self.hit >= 2:
             #če je v tej smeri še prostor
-            if not self.wrong_dir:
+            if not self.game.wrong_dir:
                 if self.dir == 0:
                     self.guess_coords = [self.guess_coords[0] + 1, self.guess_coords[-1]]
                 elif self.dir == 1:
@@ -39,9 +40,10 @@ class AI:
                 elif self.dir == 3:
                     self.guess_coords = [self.guess_coords[0], self.guess_coords[-1] - 1]
             #če v tej smeri ni več prostora (ampak je na pravi premici) gre v nasprotno smer
-            elif self.wrong_dir:
+            elif self.game.wrong_dir:
                 #če je prejšnjo zgrešil se nanaša na originalen zadetek
                 if self.previous_miss:
+                    print("self.dir: ", self.dir)
                     if self.dir == 0:
                         self.guess_coords = [self.hit_coords[0] - 1, self.hit_coords[-1]]
                     elif self.dir == 1:
@@ -61,8 +63,11 @@ class AI:
                     elif self.dir == 3:
                         self.guess_coords = [self.guess_coords[0], self.guess_coords[-1] + 1]
 
+                    print("Say hi to your dads!")
+
         #če je prvič zadel ali če je prejšnjo zgrešil
         else:
+            print("Stage 0")
             self.guess_board = []
             for i in range(len(self.game.board_com)):
                 self.guess_board.append([0 for j in range(len(self.game.board_com))])
@@ -74,9 +79,9 @@ class AI:
             target_array = [self.guess_board[x+1][y], self.guess_board[x-1][y], self.guess_board[x][y+1], self.guess_board[x][y-1]]
             target = max(target_array)
             for i, j in enumerate(target_array):
-                if i == target:
-                    self.dir = j
-                    find_coords(j, target_array)
+                if j == target:
+                    self.dir = i
+                    self.find_coords(i)
 
 
 
@@ -92,8 +97,6 @@ class AI:
                             break
                     if not obstructed:
                         for k in range(n):
-                            print(len(self.guess_board), self.hit)
-
                             self.guess_board[i][j+k] += 1
 
         for i in range (1, len(self.game.board_com)-1):
@@ -113,6 +116,7 @@ class AI:
         max_all = 0
         self.pos_guess = []
         self.mode = self.game.style
+        print("self.mode: ", self.mode)
 
         
 
@@ -124,23 +128,26 @@ class AI:
             for k in self.game.player_ships:
                 self.statistical_guess(k)
 
+            for i in range(len(self.guess_board)):
+                max_list.append(max(self.guess_board[i]))
+                max_all = max(max_list)
+
+            for i in range(len(self.guess_board)):
+                for j in range(len(self.guess_board)):
+                    if self.guess_board[i][j] == max_all:
+                        self.pos_guess.append([i,j])
+
+            pos = randint(0, len(self.pos_guess) - 1)
+            self.guess_coords = self.pos_guess[pos]
+            self.game.guess_ship(self.guess_coords[0], self.guess_coords[1], board)
+            print(self.guess_coords)
+            print()
+            print("self.hit: ")
+            print(self.hit)
+
         elif self.mode == "hit":
             self.hit_guess()
+            self.game.guess_ship(self.guess_coords[0], self.guess_coords[1], board)
 
         for row in self.guess_board:
             print(str(row))
-        print()
-
-        for i in range(len(self.guess_board)):
-            max_list.append(max(self.guess_board[i]))
-            max_all = max(max_list)
-
-        for i in range(len(self.guess_board)):
-            for j in range(len(self.guess_board)):
-                if self.guess_board[i][j] == max_all:
-                    self.pos_guess.append([i,j])
-
-        pos = randint(0, len(self.pos_guess) - 1)
-        self.guess_coords = self.pos_guess[pos]
-        self.game.guess_ship(self.guess_coords[0], self.guess_coords[1], board)
-        print(self.guess_coords)
