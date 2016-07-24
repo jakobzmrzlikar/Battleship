@@ -1,0 +1,1 @@
+Click on Main.exe to start the game.
