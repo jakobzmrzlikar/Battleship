@@ -1,8 +1,12 @@
 import sys
+import os
 from cx_Freeze import *
 
 product_name = 'Battleship'
 
+PYTHON_INSTALL_DIR = os.path.dirname(os.path.dirname(os.__file__))
+os.environ['TCL_LIBRARY'] = os.path.join(PYTHON_INSTALL_DIR, 'tcl', 'tcl8.6')
+os.environ['TK_LIBRARY'] = os.path.join(PYTHON_INSTALL_DIR, 'tcl', 'tk8.6')
 
 # http://msdn.microsoft.com/en-us/library/windows/desktop/aa371847(v=vs.85).aspx
 shortcut_table = [
@@ -10,7 +14,7 @@ shortcut_table = [
      "DesktopFolder",          # Directory_
      product_name,             # Name
      "TARGETDIR",              # Component_
-     "[TARGETDIR]\sample.exe",# Target
+     "[TARGETDIR]\main.exe",   # Target
      None,                     # Arguments
      None,                     # Description
      None,                     # Hotkey
@@ -25,7 +29,12 @@ shortcut_table = [
 msi_data = {"Shortcut": shortcut_table}
 
 # Dependencies are automatically detected, but it might need fine tuning.
-build_exe_options = {"packages": ["os"], "excludes": [""]}
+build_exe_options = {"packages": ["os"],
+                    "include_files":[
+                        os.path.join(PYTHON_INSTALL_DIR, 'DLLs', 'tk86t.dll'),
+                        os.path.join(PYTHON_INSTALL_DIR, 'DLLs', 'tcl86t.dll'),
+                        ],
+                    "excludes": [""]}
 
 bdist_msi_options = {
     'upgrade_code': '{66620F3A-DC3A-11E2-B341-002219E9B01E}',
@@ -40,9 +49,9 @@ base = None
 if sys.platform == 'win32':
     base = 'Win32GUI'
 
-exe = Executable(script='src/main.py',
+exe = Executable(script='main.py',
                  base=base,
-                 icon='~/Downloads/Battleship.ico',
+                 icon='Battleship.ico',
                  shortcutName=product_name,
                  shortcutDir='DesktopFolder'
                 )
