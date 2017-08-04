@@ -12,7 +12,7 @@ def main():
     gui = GUI(game, ai)
 
 
-start = time.time()  
+start = time.time()
 
 if __name__ == '__main__':
     main()

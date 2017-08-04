@@ -1,5 +1,5 @@
 import tkinter as tk
-from Add_ship import add_ship, make_board
+from add_ship import add_ship, make_board
 
 from GUI import GUI
 from AI import AI
@@ -13,6 +13,7 @@ class Game:
     def __init__(self):
         # makes both boards, adds ships and sets some variables
         self.window = tk.Tk()
+        self.window.title("Battleship")
         self.game_end = False
 
         self.board_player = make_board(10)
@@ -146,27 +147,27 @@ class Game:
                             if cur_0[i - 1] == 'H':
                                 board[row - 1][column - i] = 'G'
                                 board[row][column - i] =     'D'
-                                board[row + 1][column - i] = 'G'                               
-                                
-                        for i in range(1, len(cur_1)):                        
+                                board[row + 1][column - i] = 'G'
+
+                        for i in range(1, len(cur_1)):
                             if cur_1[i - 1] == 'H':
                                 board[row - 1][column + i] = 'G'
                                 board[row][column + i] =     'D'
-                                board[row + 1][column + i] = 'G'                         
+                                board[row + 1][column + i] = 'G'
 
-                        for i in range(1, len(cur_2)):         
+                        for i in range(1, len(cur_2)):
                             if cur_2[i - 1] == 'H':
                                 board[row - i][column - 1] = 'G'
                                 board[row - i][column] =     'D'
-                                board[row - i][column + 1] = 'G'                              
-                
-                        for i in range(1, len(cur_3)):        
+                                board[row - i][column + 1] = 'G'
+
+                        for i in range(1, len(cur_3)):
                             if cur_3[i - 1] == 'H':
                                 board[row + i][column - 1] = 'G'
                                 board[row + i][column] =     'D'
                                 board[row + i][column + 1] = 'G'
 
-                        board[row - 1][column - len(cur_0)] = 'G'       
+                        board[row - 1][column - len(cur_0)] = 'G'
                         board[row][column - len(cur_0)] =     'G'
                         board[row + 1][column - len(cur_0)] = 'G'
 
@@ -208,8 +209,8 @@ class Game:
                 # if it found another S tile, than the guessed tile becomes an H tile
                 if len(pos_direct) > 0:
                     board[row][column] = 'H'
-                    
-                    if self.hit == 0 and not self.wrong_dir: 
+
+                    if self.hit == 0 and not self.wrong_dir:
                         self.hit_coords = [row, column]
                     if board == self.board_com:
                         self.style = 'hit'
